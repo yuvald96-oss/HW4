@@ -16,7 +16,7 @@ from PySide6.QtWidgets import (
 )
 
 HERE = Path(__file__).parent
-GITHUB_URL = "https://github.com/YOUR-USER/YOUR-REPO"  # TODO: put your repo URL here
+GITHUB_URL = "https://github.com/yuvald96-oss/HW4"
 TABLE_ROWS = 50
 
 
@@ -111,30 +111,50 @@ class GradesWindow(QMainWindow):
             return
         self.file_label.setText(os.path.basename(file_name))
 
-        # TODO (student):
-        #   1. save file_name in self.selected_file
-        #   2. open the file and read the students into self.student_ids
-        #      and self.original_grades
-        #   3. put the same values into self.corrected_grades
-        #   4. call self.refresh_table()
+        self.selected_file = file_name
+        self.student_ids = []
+        self.original_grades = []
+        self.corrected_grades = []
+
+        with open(self.selected_file, 'r') as f:
+            lines = f.readlines()
+
+        for line in lines[1:]:  # skip the header line
+            line = line.strip()
+            if line == '':
+                continue
+            parts = line.split(',')
+            self.student_ids.append(parts[0])  # keep as text (some IDs start with 0)
+            self.original_grades.append(int(parts[1]))
+            self.corrected_grades.append(int(parts[1]))
+
+        self.refresh_table()
 
     def on_points_entered(self):
         points = self.points_spin.value()
 
-        # TODO (student):
-        #   go over the original / corrected grade lists:
-        #   corrected = original + points, but never more than 100.
-        #   Then call self.refresh_table()
+        for i in range(len(self.original_grades)):
+            new_grade = self.original_grades[i] + points
+            if new_grade > 100:
+                new_grade = 100
+            self.corrected_grades[i] = new_grade
+
+        self.refresh_table()
 
     def on_update_file_clicked(self):
         if not self.selected_file:
             QMessageBox.warning(self, "No file", "Please load a students file first.")
             return
 
-        # TODO (student):
-        #   overwrite self.selected_file with the corrected grades only.
-        #   Keep the original header line; everything except the grades
-        #   must stay identical to the original file.
+        with open(self.selected_file, 'r') as f:
+            header = f.readline().strip()  # keep the original headers
+
+        lines = [header]
+        for i in range(len(self.student_ids)):
+            lines.append(self.student_ids[i] + ',' + str(self.corrected_grades[i]))
+
+        with open(self.selected_file, 'w') as f:
+            f.write('\n'.join(lines))
 
         open_file_externally(self.selected_file)
 
