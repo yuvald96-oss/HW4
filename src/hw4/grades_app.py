@@ -1,7 +1,3 @@
-"""Exercise 1 - Grade Correction tool (PySide6).
-
-UI generated with AI. Every block marked `TODO (student)` is yours to write.
-"""
 import os
 import platform
 import subprocess
@@ -24,7 +20,6 @@ class GradesWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        # Window data (required by the assignment)
         self.student_ids = []
         self.original_grades = []
         self.corrected_grades = []
@@ -34,7 +29,6 @@ class GradesWindow(QMainWindow):
         self.resize(640, 760)
         self._build_ui()
 
-    # ------------------------------------------------------------------ UI
     def _build_ui(self):
         central = QWidget()
         root = QVBoxLayout(central)
@@ -48,7 +42,6 @@ class GradesWindow(QMainWindow):
         root.addWidget(title)
         root.addWidget(subtitle)
 
-        # Top bar: load + file name + about
         top = QHBoxLayout()
         self.load_button = QPushButton("Load Students File")
         self.load_button.setObjectName("primaryButton")
@@ -62,7 +55,6 @@ class GradesWindow(QMainWindow):
         top.addWidget(self.about_button)
         root.addLayout(top)
 
-        # Table: 3 columns x 50 rows
         self.table = QTableWidget(TABLE_ROWS, 3)
         self.table.setHorizontalHeaderLabels(["ID", "Original Grades", "Corrected Grades"])
         self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
@@ -72,13 +64,11 @@ class GradesWindow(QMainWindow):
         self.table.setSelectionBehavior(QTableWidget.SelectRows)
         root.addWidget(self.table, 1)
 
-        # Bottom bar: correction points + update file
         bottom = QHBoxLayout()
         points_label = QLabel("Correction points (press Enter):")
         self.points_spin = QSpinBox()
         self.points_spin.setRange(0, 100)
         self.points_spin.setKeyboardTracking(False)
-        # React to ENTER inside the numeric field
         self.points_spin.lineEdit().returnPressed.connect(self.on_points_entered)
         self.update_button = QPushButton("Update File")
         self.update_button.setObjectName("primaryButton")
@@ -91,9 +81,7 @@ class GradesWindow(QMainWindow):
 
         self.setCentralWidget(central)
 
-    # ------------------------------------------------------- table refresh
     def refresh_table(self):
-        """Fill the table from student_ids / original_grades / corrected_grades."""
         self.table.clearContents()
         for row in range(min(len(self.student_ids), TABLE_ROWS)):
             values = (self.student_ids[row], self.original_grades[row], self.corrected_grades[row])
@@ -102,7 +90,6 @@ class GradesWindow(QMainWindow):
                 item.setTextAlignment(Qt.AlignCenter)
                 self.table.setItem(row, col, item)
 
-    # ------------------------------------------------------------ handlers
     def on_load_clicked(self):
         file_name, _ = QFileDialog.getOpenFileName(
             self, "Select students file", str(HERE / "data"), "CSV files (*.csv);;All files (*)"
@@ -111,50 +98,17 @@ class GradesWindow(QMainWindow):
             return
         self.file_label.setText(os.path.basename(file_name))
 
-        self.selected_file = file_name
-        self.student_ids = []
-        self.original_grades = []
-        self.corrected_grades = []
-
-        with open(self.selected_file, 'r') as f:
-            lines = f.readlines()
-
-        for line in lines[1:]:  # skip the header line
-            line = line.strip()
-            if line == '':
-                continue
-            parts = line.split(',')
-            self.student_ids.append(parts[0])  # keep as text (some IDs start with 0)
-            self.original_grades.append(int(parts[1]))
-            self.corrected_grades.append(int(parts[1]))
-
-        self.refresh_table()
 
     def on_points_entered(self):
         points = self.points_spin.value()
 
-        for i in range(len(self.original_grades)):
-            new_grade = self.original_grades[i] + points
-            if new_grade > 100:
-                new_grade = 100
-            self.corrected_grades[i] = new_grade
 
-        self.refresh_table()
 
     def on_update_file_clicked(self):
         if not self.selected_file:
             QMessageBox.warning(self, "No file", "Please load a students file first.")
             return
 
-        with open(self.selected_file, 'r') as f:
-            header = f.readline().strip()  # keep the original headers
-
-        lines = [header]
-        for i in range(len(self.student_ids)):
-            lines.append(self.student_ids[i] + ',' + str(self.corrected_grades[i]))
-
-        with open(self.selected_file, 'w') as f:
-            f.write('\n'.join(lines))
 
         open_file_externally(self.selected_file)
 
@@ -170,7 +124,6 @@ class GradesWindow(QMainWindow):
 
 
 def open_file_externally(path):
-    """Open a file with the OS default app (Excel for .csv) on Windows / macOS / Linux."""
     system = platform.system()
     if system == "Windows":
         os.startfile(path)
