@@ -23,20 +23,8 @@ class GradesWindow(QMainWindow):
         self.student_ids = []
         self.original_grades = []
         self.corrected_grades = []
-        self.selected_file = 'C:\\Users\\yuval\\Desktop\\advanced coding\\HW\\HW4\\grades.csv'
-        with open(self.selected_file, 'r') as f:
-            lines = f.readlines()
-        for line in lines[1:]:  
-            line = line.strip()
-            if line == '':
-                continue
-            parts = line.split(',')
-            self.student_ids.append(parts[0])
-            self.original_grades.append(int(parts[1]))
-            self.corrected_grades.append(int(parts[1]))
-
-        self.refresh_table()
-
+        self.selected_file = ''
+      
     
 
         self.setWindowTitle("Grade Correction")
@@ -111,6 +99,25 @@ class GradesWindow(QMainWindow):
         if not file_name:
             return
         self.file_label.setText(os.path.basename(file_name))
+        self.selected_file = file_name
+        self.student_ids = []
+        self.original_grades = []
+        self.corrected_grades = []
+        with open(self.selected_file, 'r') as f:
+            lines = f.readlines()
+        for line in lines[1:]:
+            line = line.strip()
+            if line == '':
+                continue
+            parts = line.split(',')
+            self.student_ids.append(parts[0])
+            self.original_grades.append(int(parts[1]))
+            self.corrected_grades.append(int(parts[1]))
+        
+        self.refresh_table()
+        
+        
+        
 
 
     def on_points_entered(self):
@@ -129,8 +136,8 @@ class GradesWindow(QMainWindow):
         if not self.selected_file:
             QMessageBox.warning(self, "No file", "Please load a students file first.")
             return
-         with open(self.selected_file, 'r') as f:
-            header = f.readline().strip()  # keep the original headers
+        with open(self.selected_file, 'r') as f:
+            header = f.readline().strip()  
 
         lines = [header]
         for i in range(len(self.student_ids)):
