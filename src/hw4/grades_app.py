@@ -23,7 +23,21 @@ class GradesWindow(QMainWindow):
         self.student_ids = []
         self.original_grades = []
         self.corrected_grades = []
-        self.selected_file = ''
+        self.selected_file = 'C:\\Users\\yuval\\Desktop\\advanced coding\\HW\\HW4\\grades.csv'
+        with open(self.selected_file, 'r') as f:
+            lines = f.readlines()
+        for line in lines[1:]:  
+            line = line.strip()
+            if line == '':
+                continue
+            parts = line.split(',')
+            self.student_ids.append(parts[0])
+            self.original_grades.append(int(parts[1]))
+            self.corrected_grades.append(int(parts[1]))
+
+        self.refresh_table()
+
+    
 
         self.setWindowTitle("Grade Correction")
         self.resize(640, 760)
@@ -101,6 +115,13 @@ class GradesWindow(QMainWindow):
 
     def on_points_entered(self):
         points = self.points_spin.value()
+        for i in range(len(self.original_grades)):
+            new_grade = self.original_grades[i] + points
+            if new_grade > 100:
+                new_grade = 100
+            self.corrected_grades[i] = new_grade
+
+        self.refresh_table()
 
 
 
@@ -108,6 +129,15 @@ class GradesWindow(QMainWindow):
         if not self.selected_file:
             QMessageBox.warning(self, "No file", "Please load a students file first.")
             return
+         with open(self.selected_file, 'r') as f:
+            header = f.readline().strip()  # keep the original headers
+
+        lines = [header]
+        for i in range(len(self.student_ids)):
+            lines.append(self.student_ids[i] + ',' + str(self.corrected_grades[i]))
+
+        with open(self.selected_file, 'w') as f:
+            f.write('\n'.join(lines))
 
 
         open_file_externally(self.selected_file)
