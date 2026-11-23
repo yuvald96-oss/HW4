@@ -24,8 +24,6 @@ class GradesWindow(QMainWindow):
         self.original_grades = []
         self.corrected_grades = []
         self.selected_file = ''
-      
-    
 
         self.setWindowTitle("Grade Correction")
         self.resize(640, 760)
@@ -113,12 +111,8 @@ class GradesWindow(QMainWindow):
             self.student_ids.append(parts[0])
             self.original_grades.append(int(parts[1]))
             self.corrected_grades.append(int(parts[1]))
-        
-        self.refresh_table()
-        
-        
-        
 
+        self.refresh_table()
 
     def on_points_entered(self):
         points = self.points_spin.value()
@@ -130,14 +124,12 @@ class GradesWindow(QMainWindow):
 
         self.refresh_table()
 
-
-
     def on_update_file_clicked(self):
         if not self.selected_file:
             QMessageBox.warning(self, "No file", "Please load a students file first.")
             return
         with open(self.selected_file, 'r') as f:
-            header = f.readline().strip()  
+            header = f.readline().strip()
 
         lines = [header]
         for i in range(len(self.student_ids)):
@@ -145,7 +137,6 @@ class GradesWindow(QMainWindow):
 
         with open(self.selected_file, 'w') as f:
             f.write('\n'.join(lines))
-
 
         open_file_externally(self.selected_file)
 
